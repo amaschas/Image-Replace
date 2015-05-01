@@ -43,7 +43,7 @@ if ( ! class_exists( 'DB_Image_Replace' ) ) {
 		public function __construct() {
 			add_action( 'init', array( $this, 'get_img_sizes' ) );
 			add_action( 'init', array( $this, 'image_arrays' ) );
-			// add_filter( 'post_thumbnail_html', array( $this, 'image_src_filter' ), 99, 5 );
+			add_filter( 'post_thumbnail_html', array( $this, 'image_src_filter' ), 99, 5 );
 			add_filter( 'image_downsize', array( $this, 'attachment_image_src_filter' ), 99, 3 );
 		}
 
