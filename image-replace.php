@@ -55,6 +55,21 @@ if ( ! class_exists( 'DB_Image_Replace' ) ) {
 
 		}
 
+		public function get_image_src( $img_id_hash, $target_w, $target_h ) {
+			$image = DB_IMAGE_REPLACE_PATH . 'imgs/futurama/' . basename( $this->img_files[ $rand ] ); // the image to crop
+			$dest_image = 'imgs/temp/' . $img_id_hash . '-' . $target_w . 'x' . $target_h . '.jpg'; // make sure the directory is writeable
+			$img = imagecreatetruecolor( intval( $target_w ), intval( $target_h ) );
+			$org_img = imagecreatefromjpeg( $image );
+			$original_size = getimagesize( $image );
+			$target_x_start = ( $original_size[0] / 2 ) - ( $target_w / 2 );
+			$target_y_start = ( $original_size[1] / 2 ) - ( $target_h / 2 );
+
+			fopen( DB_IMAGE_RELPACE_LOCAL_PATH . 'imgs/temp/' . $img_id_hash . '-' . $target_w . 'x' . $target_h . '.jpg', 'w' );
+			imagecopy( $img, $org_img, 0, 0, $target_x_start, $target_y_start, intval( $target_w ), intval( $target_h ) );
+			imagejpeg( $img, DB_IMAGE_RELPACE_LOCAL_PATH . $dest_image, 90 );
+			return $dest_image;
+		}
+
 		public function image_src_filter( $html, $post_id, $post_thumbnail_id, $size, $attr ) {
 
 			// dealing with different $size array on single.php
@@ -70,17 +85,18 @@ if ( ! class_exists( 'DB_Image_Replace' ) ) {
 			$img_id_hash = hash( 'md5', basename( $this->img_files[ $rand ] ) );
 
 			if ( false === ( $html = get_transient( $img_id_hash . '-' . $target_w . 'x' . $target_h ) ) ) {
-				$image = DB_IMAGE_REPLACE_PATH . 'imgs/futurama/' . basename( $this->img_files[ $rand ] ); // the image to crop
-				$dest_image = 'imgs/temp/' . $img_id_hash . '-' . $target_w . 'x' . $target_h . '.jpg'; // make sure the directory is writeable
-				$img = imagecreatetruecolor( intval( $target_w ), intval( $target_h ) );
-				$org_img = imagecreatefromjpeg( $image );
-				$original_size = getimagesize( $image );
-				$target_x_start = ( $original_size[0] / 2 ) - ( $target_w / 2 );
-				$target_y_start = ( $original_size[1] / 2 ) - ( $target_h / 2 );
+				// $image = DB_IMAGE_REPLACE_PATH . 'imgs/futurama/' . basename( $this->img_files[ $rand ] ); // the image to crop
+				// $dest_image = 'imgs/temp/' . $img_id_hash . '-' . $target_w . 'x' . $target_h . '.jpg'; // make sure the directory is writeable
+				// $img = imagecreatetruecolor( intval( $target_w ), intval( $target_h ) );
+				// $org_img = imagecreatefromjpeg( $image );
+				// $original_size = getimagesize( $image );
+				// $target_x_start = ( $original_size[0] / 2 ) - ( $target_w / 2 );
+				// $target_y_start = ( $original_size[1] / 2 ) - ( $target_h / 2 );
 
-				fopen( DB_IMAGE_RELPACE_LOCAL_PATH . 'imgs/temp/' . $img_id_hash . '-' . $target_w . 'x' . $target_h . '.jpg', 'w' );
-				imagecopy( $img, $org_img, 0, 0, $target_x_start, $target_y_start, intval( $target_w ), intval( $target_h ) );
-				imagejpeg( $img, DB_IMAGE_RELPACE_LOCAL_PATH . $dest_image, 90 );
+				// fopen( DB_IMAGE_RELPACE_LOCAL_PATH . 'imgs/temp/' . $img_id_hash . '-' . $target_w . 'x' . $target_h . '.jpg', 'w' );
+				// imagecopy( $img, $org_img, 0, 0, $target_x_start, $target_y_start, intval( $target_w ), intval( $target_h ) );
+				// imagejpeg( $img, DB_IMAGE_RELPACE_LOCAL_PATH . $dest_image, 90 );
+				$dest_image = $this->get_image_src( $img_id_hash, $target_w, $target_h );
 
 				$html = '<img src="' . esc_url( DB_IMAGE_REPLACE_PATH . 'imgs/temp/' . basename( $dest_image ) ) . '" width="' . intval( $target_w ) . '" height="' . intval( $target_h ) . '" />';
 				set_transient( $img_id_hash . '-' . $target_w . 'x' . $target_h, $html );
